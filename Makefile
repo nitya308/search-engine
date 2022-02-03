@@ -12,8 +12,8 @@ all:
 	(cd $L && if [ -r set.c ]; then make $L.a; else cp $L-given.a $L.a; fi)
 	make -C common
 	make -C crawler
-	make -C indexer
-	make -C querier
+	# make -C indexer
+	# make -C querier
 
 ############### TAGS for emacs users ##########
 TAGS:  Makefile */Makefile */*.c */*.h */*.md */*.sh
@@ -26,5 +26,5 @@ clean:
 	make -C libcs50 clean
 	make -C common clean
 	make -C crawler clean
-	make -C indexer clean
-	make -C querier clean
+	# make -C indexer clean
+	# make -C querier clean

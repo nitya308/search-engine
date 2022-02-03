@@ -1,5 +1,5 @@
 # CS50 TSE
-## Student name (GitHub username)
+## Nitya Agarwala (nitya308)
 
 The assignment and Specs are in a [public repo](https://github.com/cs50winter2022/labs/tse).
 Do not clone that repo; view it on GitHub.

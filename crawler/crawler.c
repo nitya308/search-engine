@@ -4,7 +4,7 @@
  * This file contains the crawler for the tse module. 
  * It crawls the web starting from a seedURL and retrives webpages to a certain depth. 
  * It parses the current webpage and extracts embedded URLs
- * then retrieves each of those pages until depth is received
+ * It then retrieves each of those pages until depth is received
  *
  */
 
@@ -18,13 +18,24 @@
 #include "../libcs50/hashtable.h"
 #include "../libcs50/webpage.h"
 
-// prototype declarations
+// function prototypes
 int main(const int argc, char *argv[]);
 static void parseArgs(const int argc, char *argv[],
                       char **seedURL, char **pageDirectory, int *maxDepth);
 static void crawl(char *seedURL, char *pageDirectory, const int maxDepth);
 static void pageScan(webpage_t *page, bag_t *pagesToCrawl, hashtable_t *pagesSeen);
 
+/**************** main ****************/
+/* Main fucntion for crawler.c
+ *
+ * Arguments: seedURL pageDirectory maxDepth
+ * 
+ * Arguments are checked and validated by parseArgs which is called by main
+ * Crawling is done by crawler which is also called by main
+ * 
+ * We exit:
+ *  with 0 if no errors have occured
+ */
 int main(const int argc, char *argv[])
 {
   char *seedURL = NULL;
@@ -35,19 +46,31 @@ int main(const int argc, char *argv[])
   exit(0);
 }
 
+/**************** parseArgs ****************/
+/* To check and validate arguments
+ *
+ * Caller provides
+ *   arguments to main: argc and argv[]
+ *   pointers to seedURL, pageDirectory and maxDepth
+ * 
+ * We print an error and exit non-0 if any of the following conditions are not met
+ *    seedURL = argv[1] must be a valid internal URL
+ *    pageDirectory = argv[2] must be a directory that can be successfully initialized
+ *    maxDepth = argv[3] must be a valid integer in range 0 to 10
+ */
 static void parseArgs(const int argc, char *argv[], char **seedURL, char **pageDirectory, int *maxDepth)
 {
   const char *progName = argv[0]; // name of this program
 
   if (argc != 4)
   {
-    fprintf(stderr, "X usage: %s seedURL pageDirectory maxDepth\n", progName);
+    fprintf(stderr, "error: wrong number of arguments\nusage: %s seedURL pageDirectory maxDepth\n", progName);
     exit(1);
   }
 
   // TO  ASK: MALLOC???
   *seedURL = argv[1];
-  char *normalizedURL = normalizeURL(*seedURL); // TO ASK: where to free this????
+  char *normalizedURL = normalizeURL(*seedURL); // TO ASK: WHERE TO FREE THIS????
   if (normalizedURL == NULL)
   {
     fprintf(stderr, "error: invalid URL\n");
@@ -55,16 +78,17 @@ static void parseArgs(const int argc, char *argv[], char **seedURL, char **pageD
   }
   if (!isInternalURL(normalizedURL))
   {
-    mem_free(normalizedURL); //??
+    free(normalizedURL); //??
     fprintf(stderr, "error: URL is not internal URL\n");
     exit(3);
   }
+  free(normalizedURL);
 
   // TO ASK: malloc
   *pageDirectory = argv[2];
   if (!pagedir_init(*pageDirectory))
   {
-    fprintf(stderr, "error: could not open crawler file for writing\n");
+    fprintf(stderr, "error: page directory does not exist or not writeable\n");
     exit(4);
   }
   const char *maxDepthString = argv[3];
@@ -89,14 +113,21 @@ static void parseArgs(const int argc, char *argv[], char **seedURL, char **pageD
   }
 }
 
+/**************** crawl ****************/
+/* Crawls from seedURL to maxDepth and saves pages in pageDirectory
+ *
+ * Caller provides
+ *   valid internal seedURL
+ *   initialized pageDirectory for writing
+ *   valid integer maxDepth between 0 to 10
+ *
+ * IMPORTANT:
+ *   we call free() on all memory initialized in the function
+ */
 static void crawl(char *seedURL, char *pageDirectory, const int maxDepth)
 {
-  hashtable_t *seenht = hashtable_new(200);
-  if (seenht == NULL)
-  {
-    fprintf(stderr, "error creating hashtable");
-    exit(1);
-  }
+
+  // Create bag of webpages to crawl
   bag_t *toCrawlBag = bag_new();
   if (toCrawlBag == NULL)
   {
@@ -104,33 +135,44 @@ static void crawl(char *seedURL, char *pageDirectory, const int maxDepth)
     exit(1);
   }
 
-  char* URLcopy = mem_malloc(strlen(seedURL)+1);
+  // Make a copy of the URL string
+  char *URLcopy = mem_malloc(strlen(seedURL) + 1);
   strcpy(URLcopy, seedURL);
 
-  // add seedURL to the hashtable of URLs seen so far
+  // add seedURL to the bag of webpages to crawl, marked with depth=0
+  bag_insert(toCrawlBag, webpage_new(URLcopy, 0, NULL));
+
+  // Create a hashtable of seen URLs
+  hashtable_t *seenht = hashtable_new(200);
+  if (seenht == NULL)
+  {
+    fprintf(stderr, "error creating hashtable");
+    exit(1);
+  }
+  // Add seedURL to the hashtable of URLs seen so far
   if (!hashtable_insert(seenht, seedURL, ""))
   {
     fprintf(stderr, "error inserting in hashtable");
     exit(1);
   }
 
-  // add seedURL to the bag of webpages to crawl, marked with depth=0
-  bag_insert(toCrawlBag, webpage_new(URLcopy, 0, NULL));
-
   webpage_t *currWebPage = NULL;
+
   // while there are more webpages in the bag
   // extract a webpage (URL,depth) item from the bag
-  int uniqueID = 1;
+  int uniqueID = 0;
   while ((currWebPage = (webpage_t *)bag_extract(toCrawlBag)) != NULL)
   {
     sleep(1); //pause for one second
     //use pagefetcher to retrieve a webpage for that URL
     if (webpage_fetch(currWebPage))
     {
+      // HERE: checks?
+      printf("%d  Fetched: %s\n", webpage_getDepth(currWebPage), webpage_getURL(currWebPage));
       // use pagesaver to write the webpage to the pageDirectory with a unique document ID
-      pagedir_save(currWebPage, pageDirectory, ++uniqueID); //UNIQUE ID?
+      pagedir_save(currWebPage, pageDirectory, ++uniqueID);
       // if the webpage is not at maxDepth
-      if (webpage_getDepth(currWebPage) < maxDepth) //LESS THAN???
+      if (webpage_getDepth(currWebPage) < maxDepth)
       {
         // pageScan that HTML
         pageScan(currWebPage, toCrawlBag, seenht);
@@ -143,28 +185,54 @@ static void crawl(char *seedURL, char *pageDirectory, const int maxDepth)
     }
     webpage_delete(currWebPage); //delete that webpage
   }
-  hashtable_delete(seenht, NULL); // delete the hashtable NULL?? (TO ASK)
-  bag_delete(toCrawlBag, NULL);   // delete the bag
+  hashtable_delete(seenht, NULL);         // delete the hashtable
+  bag_delete(toCrawlBag, webpage_delete); // delete the bag
 }
 
+/**************** pageScan ****************/
+/* Scan the given webpage to extract any links
+ * Adds any URL not already seen before to the hashtable pagesSeen and bag pagesToCrawl
+ *
+ * Caller provides
+ *   pointer to a webpage_t provided by webpage_new.
+ *   pointer to bag of pages to crawl
+ *   pointer to hashtable to pages already seen
+ *
+ * IMPORTANT:
+ *   we make a copy of the URL and free() it at the end of the function
+ */
 static void pageScan(webpage_t *page, bag_t *pagesToCrawl, hashtable_t *pagesSeen)
 {
+  const int depth = webpage_getDepth(page);
+  printf("%d Scanning: %s\n", depth, webpage_getURL(page));
   char *currURL = NULL;
   // while there is another URL in the page
   int pos = 0;
   while ((currURL = webpage_getNextURL(page, &pos)) != NULL)
   {
-    currURL = normalizeURL(currURL);
-    if (isInternalURL(currURL)) // if that URL is Internal
+    printf("%d    Found: %s\n", depth, currURL);
+    char *normalizedURL = normalizeURL(currURL);
+    if (isInternalURL(normalizedURL)) // if that URL is Internal
     {
       //insert the webpage into the hashtable
-      if (hashtable_insert(pagesSeen, currURL, ""))
+      if (hashtable_insert(pagesSeen, normalizedURL, ""))
       {
         //create a webpage_t for it
-        webpage_t *newWebPage = webpage_new(currURL, webpage_getDepth(page) + 1, NULL);
+        webpage_t *newWebPage = webpage_new(normalizedURL, webpage_getDepth(page) + 1, NULL);
         // insert the webpage into the bag
         bag_insert(pagesToCrawl, newWebPage);
+        printf("%d    Added: %s\n", depth, currURL);
       }
+      else
+      {
+        printf("%d  IgnDupl: %s\n", depth, currURL); //HERE: print curr or normalized??? and depth?
+        mem_free(normalizedURL);
+      }
+    }
+    else
+    {
+      printf("%d IgnExtrn: %s\n", depth, currURL);
+      mem_free(normalizedURL);
     }
     mem_free(currURL);
   }

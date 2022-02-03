@@ -1,10 +1,15 @@
 /* 
- * bag.c - CS50 'bag' module
+ * pagedir.c - CS50 'pagedir' module
  *
- * see bag.h for more information.
+ * see pagedir.h for more information.
  *
- * David Kotz, April 2016, 2017, 2019, 2021
+ * Nitya Agarwala, Jan 2022
  */
+
+// if GNU_SOURCE is not defined, define it
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,17 +17,31 @@
 #include <stdbool.h>
 #include "../libcs50/webpage.h"
 #include "pagedir.h"
+#include "assert.h"
 
+/**************** file-local global variables ****************/
+/* none */
+
+/**************** global functions ****************/
+/* that is, visible outside this file */
 bool pagedir_init(const char *pageDirectory);
 void pagedir_save(const webpage_t *page, const char *pageDirectory, const int docID);
 
-char *make_filename(const char *directorName, const char *file);
+/**************** local functions ****************/
+/* not visible outside this file */
+static char *make_filename(const char *directorName, const char *file);
 
+/**************** pagedir_init() ****************/
+/* see pagedir.h for description */
 bool pagedir_init(const char *pageDirectory)
 {
   //construct the pathname for the .crawler file in that directory
-  // TOASK: HOW TO???
   char *pathName = make_filename(pageDirectory, ".crawler");
+  if (pathName == NULL)
+  {
+    fprintf(stderr, "error: could not create pathname\n");
+    exit(3);
+  }
 
   // open the file for writing
   FILE *fp = NULL;
@@ -39,12 +58,26 @@ bool pagedir_init(const char *pageDirectory)
   return true;
 }
 
+/**************** pagedir_save() ****************/
+/* see pagedir.h for description */
 void pagedir_save(const webpage_t *page, const char *pageDirectory, const int docID)
 {
   // construct the pathname for the page file in pageDirectory
-  // TO ASK HOW TO MAKE PATHNAME AND FREE????
-
-  char *pathName = make_filename(pageDirectory, docID); //HOW TO CONVERT TO INT?
+  // HERE OK?
+  char *strID = NULL;
+  asprintf(&strID, "%d", docID);
+  if (strID == NULL)
+  {
+    fprintf(stderr, "error: could not access ID\n");
+    exit(3);
+  }
+  char *pathName = make_filename(pageDirectory, strID);
+  if (pathName == NULL)
+  {
+    fprintf(stderr, "error: create filename for docID %d\n", docID);
+    exit(3);
+  }
+  free(strID);
 
   // open the file for writing
   FILE *fp = NULL;
@@ -62,7 +95,7 @@ void pagedir_save(const webpage_t *page, const char *pageDirectory, const int do
   if (url == NULL)
   {
     fprintf(stderr, "error while writing the URL of file %d\n", docID);
-    exit(3); //TOASK: EXIT HERE OK?
+    exit(3);
   }
   fprintf(fp, "%s\n", url);
 
@@ -74,7 +107,7 @@ void pagedir_save(const webpage_t *page, const char *pageDirectory, const int do
   }
   fprintf(fp, "%d\n", depth);
 
-  // print the contents of the webpage TO ASK OK??
+  // print the contents of the webpage
   char *html = webpage_getHTML(page);
   if (html == NULL)
   {
@@ -94,15 +127,28 @@ void pagedir_save(const webpage_t *page, const char *pageDirectory, const int do
   }
 }
 
-char *make_filename(const char *directoryName, const char *file)
+/**************** make_filename ****************/
+/* Makes a path for the file by combining directoryName and name of file
+ * Caller provides:
+ *    non-NULL strings for directory name and file name
+ * We return: 
+ *    name of new file
+ *    NULL if parameters were NULL
+ * Caller is responsible for:
+ *    freeing memory malloced for the file path */
+static char *make_filename(const char *directoryName, const char *file)
 {
-  char *fileName = malloc(strlen(directoryName) + strlen(file) + 2);
+  if (directoryName == NULL || file == NULL)
+  {
+    return NULL;
+  }
+  char *fileName = malloc(strlen(directoryName) + strlen(file) + 10);
   if (fileName == NULL)
   {
     fprintf(stderr, "Error in allocating memory for filename");
-    exit(5);
+    exit(5); // HERE: EXIT OR RETURN
   }
-  strcat(fileName, directoryName);
+  strcpy(fileName, directoryName);
   strcat(fileName, "/");
   strcat(fileName, file);
   return fileName;
