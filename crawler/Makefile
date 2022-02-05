@@ -43,4 +43,5 @@ clean:
 	rm -f core
 	rm -rf *~ *.o *.dSYM
 	rm -f crawler
-	rm -rf ../testDir
+	rm -rf testDir
+	rm -rf testing.out

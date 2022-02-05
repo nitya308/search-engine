@@ -1,5 +1,5 @@
 # Makefile for common directory
-#   Builds and compiles all these pagedir module
+# Builds and compiles the pagedir module
 #
 # Nitya Agarwala, 2022
 

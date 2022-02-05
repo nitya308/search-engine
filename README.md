@@ -1,9 +1,33 @@
 # CS50 TSE
 ## Nitya Agarwala (nitya308)
 
-The assignment and Specs are in a [public repo](https://github.com/cs50winter2022/labs/tse).
-Do not clone that repo; view it on GitHub.
-Watch there for any commits that may represent updates to the assignment or specs.
+This is the **Tiny Search Engine** project for CS 50: Software Design and Implementation
 
-Add here any assumptions you made while writing the crawler, any ways in which your implementation differs from the three Specs, or any ways in which you know your implementation fails to work.
+It contains (will contain) 3 main parts: _crawler_, _indexer_ and _querier_. For assumptions and implementation of each, see individual directories.
+
+Files contained in this repository so far:
+```
+|-- .gitignore
+|-- Makefile
+|-- README.md
+|-- common
+|   |-- Makefile
+|   |-- index.c
+|   |-- index.h
+|   |-- pagedir.c
+|   |-- pagedir.h
+|   |-- word.c
+|   `-- word.h
+|-- crawler
+|   |-- .gitignore
+|   |-- DESIGN.md
+|   |-- IMPLEMENTATION.md
+|   |-- Makefile
+|   |-- README.md
+|   |-- REQUIREMENTS.md
+|   |-- crawler.c
+|   |-- testing.out
+|   |-- testing.sh
+|   `-- valgrind.sh
+```
 
