@@ -125,7 +125,7 @@ static void parseArgs(const int argc, char* argv[], char** seedURL, char** pageD
 static void crawl(char* seedURL, char* pageDirectory, const int maxDepth)
 {
   // Create bag of webpages to crawl
-  bag_t* toCrawlBag = mem_assert(bag_new(), "bag_new");
+  bag_t* toCrawlBag = mem_assert(bag_new(), "bag_new failed");
 
   // Make a copy of the URL string
   char* URLcopy = mem_malloc(strlen(seedURL) + 1);
@@ -136,7 +136,7 @@ static void crawl(char* seedURL, char* pageDirectory, const int maxDepth)
 
   // Create a hashtable of seen URLs
   const int numSlots = 200;
-  hashtable_t* seenht = mem_assert(hashtable_new(numSlots), "hastable_new");
+  hashtable_t* seenht = mem_assert(hashtable_new(numSlots), "hastable_new failed");
 
   // Add seedURL to the hashtable of URLs seen so far
   if (!hashtable_insert(seenht, seedURL, "")) {
