@@ -73,7 +73,11 @@ To test with valgrind, `make valgrind`.
 
 ### Exit codes
 0 - everything successful
+
 1 - invalid arguments to command line
+
 2 - page not fetched
+
 3 - error creating file pathnames or opening files
+
 4 - error writing to files

@@ -6,7 +6,7 @@
 # output: writes the valgrind results from tests
 
 myvalgrind='valgrind --leak-check=full --show-leak-kinds=all'
-DATA=../testDir/valgrind
+DATA=testDir/valgrind
 SEED=http://cs50tse.cs.dartmouth.edu/tse/toscrape/index.html
 DEPTH=1
 

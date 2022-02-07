@@ -5,7 +5,7 @@
  * It crawls the web starting from a seedURL and retrives webpages to a certain depth.
  * It parses the current webpage and extracts embedded URLs
  * It then retrieves each of those pages until depth is received
- * 
+ *
  * It includes functions:
  * main which runs the program
  * parseArgs which initializes arguments
@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #include "../common/pagedir.h"
 #include "../libcs50/bag.h"
 #include "../libcs50/hashtable.h"
@@ -81,7 +82,7 @@ static void parseArgs(const int argc, char* argv[], char** seedURL, char** pageD
     exit(1);
   }
   if (!isInternalURL(normalizedURL)) {
-    free(normalizedURL);  //??
+    free(normalizedURL);
     fprintf(stderr, "error: URL is not internal URL\n");
     exit(1);
   }
@@ -125,11 +126,7 @@ static void parseArgs(const int argc, char* argv[], char** seedURL, char** pageD
 static void crawl(char* seedURL, char* pageDirectory, const int maxDepth)
 {
   // Create bag of webpages to crawl
-  bag_t* toCrawlBag = bag_new();
-  if (toCrawlBag == NULL) {
-    fprintf(stderr, "error creating bag");
-    exit(1);
-  }
+  bag_t* toCrawlBag = mem_assert(bag_new(), "bag_new");
 
   // Make a copy of the URL string
   char* URLcopy = mem_malloc(strlen(seedURL) + 1);
@@ -140,11 +137,8 @@ static void crawl(char* seedURL, char* pageDirectory, const int maxDepth)
 
   // Create a hashtable of seen URLs
   const int numSlots = 200;
-  hashtable_t* seenht = hashtable_new(numSlots);
-  if (seenht == NULL) {
-    fprintf(stderr, "error creating hashtable");
-    exit(1);
-  }
+  hashtable_t* seenht = mem_assert(hashtable_new(numSlots), "hastable_new");
+
   // Add seedURL to the hashtable of URLs seen so far
   if (!hashtable_insert(seenht, seedURL, "")) {
     fprintf(stderr, "error inserting in hashtable");
@@ -156,8 +150,7 @@ static void crawl(char* seedURL, char* pageDirectory, const int maxDepth)
   // while there are more webpages in the bag
   // extract a webpage (URL,depth) item from the bag
   int uniqueID = 0;
-  while ((currWebPage = (webpage_t* )bag_extract(toCrawlBag)) != NULL) {
-    sleep(1);  // pause for one second
+  while ((currWebPage = (webpage_t*)bag_extract(toCrawlBag)) != NULL) {
     // use pagefetcher to retrieve a webpage for that URL
     if (webpage_fetch(currWebPage)) {
       printf("%d  Fetched: %s\n", webpage_getDepth(currWebPage), webpage_getURL(currWebPage));
@@ -168,10 +161,6 @@ static void crawl(char* seedURL, char* pageDirectory, const int maxDepth)
         // pageScan that HTML
         pageScan(currWebPage, toCrawlBag, seenht);
       }
-    }
-    else {
-      fprintf(stderr, "error: page not fetched properly\n");
-      exit(2);
     }
     webpage_delete(currWebPage);  // delete that webpage
   }
@@ -201,24 +190,26 @@ static void pageScan(webpage_t* page, bag_t* pagesToCrawl, hashtable_t* pagesSee
   while ((currURL = webpage_getNextURL(page, &pos)) != NULL) {
     printf("%d    Found: %s\n", depth, currURL);
     char* normalizedURL = normalizeURL(currURL);
-    if (isInternalURL(normalizedURL)) {
-      // if that URL is Internal
-      // insert the webpage into the hashtable
-      if (hashtable_insert(pagesSeen, normalizedURL, "")) {
-        // create a webpage_t for it
-        webpage_t* newWebPage = webpage_new(normalizedURL, webpage_getDepth(page) + 1, NULL);
-        // insert the webpage into the bag
-        bag_insert(pagesToCrawl, newWebPage);
-        printf("%d    Added: %s\n", depth, normalizedURL);
+    if (normalizedURL != NULL) {
+      if (isInternalURL(normalizedURL)) {
+        // if that URL is Internal
+        // insert the webpage into the hashtable
+        if (hashtable_insert(pagesSeen, normalizedURL, "")) {
+          // create a webpage_t for it
+          webpage_t* newWebPage = webpage_new(normalizedURL, webpage_getDepth(page) + 1, NULL);
+          // insert the webpage into the bag
+          bag_insert(pagesToCrawl, newWebPage);
+          printf("%d    Added: %s\n", depth, normalizedURL);
+        }
+        else {
+          printf("%d  IgnDupl: %s\n", depth, normalizedURL);
+          mem_free(normalizedURL);
+        }
       }
       else {
-        printf("%d  IgnDupl: %s\n", depth, normalizedURL);
+        printf("%d IgnExtrn: %s\n", depth, normalizedURL);
         mem_free(normalizedURL);
       }
-    }
-    else {
-      printf("%d IgnExtrn: %s\n", depth, normalizedURL);
-      mem_free(normalizedURL);
     }
     mem_free(currURL);
   }

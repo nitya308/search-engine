@@ -1,6 +1,6 @@
-# test.sh - performs crawler testing
+# testing.sh - performs crawler testing
 #
-# usage: test.sh
+# usage: testing.sh
 #
 # input: none
 # output: writes file with results from tests
@@ -83,5 +83,4 @@ mkdir testDir/wikipedia-depth1
 mkdir testDir/wikipedia-depth2
 ./crawler http://cs50tse.cs.dartmouth.edu/tse/wikipedia/index.html testDir/wikipedia-depth2 2
 
-# Ending with make clean
-make clean
+# end of tests
