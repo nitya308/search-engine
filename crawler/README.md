@@ -72,7 +72,7 @@ See `testing.out` for details of testing and an example test run.
 To test with valgrind, `make valgrind`.
 
 ### Exit codes
-0 - everything successful
+0 - everything was successful
 
 1 - invalid arguments to command line
 
