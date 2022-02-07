@@ -42,3 +42,4 @@ bool pagedir_init(const char *pageDirectory);
  *   If there is an error while retrieving content to print to file
  */
 void pagedir_save(const webpage_t *page, const char *pageDirectory, const int docID);
+

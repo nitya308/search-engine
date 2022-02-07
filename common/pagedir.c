@@ -14,7 +14,7 @@
 #include <string.h>
 
 #include "../libcs50/webpage.h"
-#include "assert.h"
+#include "../libcs50/mem.h"
 
 /**************** file-local global variables ****************/
 /* none */
@@ -24,20 +24,18 @@
 bool pagedir_init(const char *pageDirectory);
 void pagedir_save(const webpage_t *page, const char *pageDirectory, const int docID);
 
-/**************** local functions ****************/
-/* not visible outside this file */
-static char *make_filename(const char *directorName, const char *file);
-
 /**************** pagedir_init() ****************/
 /* see pagedir.h for description */
 bool pagedir_init(const char *pageDirectory)
 {
   // construct the pathname for the .crawler file in that directory
-  char *pathName = make_filename(pageDirectory, ".crawler");
+  char *pathName = mem_malloc_assert((strlen(pageDirectory) + strlen("/.crawler") + 1), "error making pathname");
   if (pathName == NULL) {
     fprintf(stderr, "error: could not create pathname\n");
     exit(3);
   }
+  strcpy(pathName, pageDirectory);
+  strcat(pathName, "/.crawler");
 
   // open the file for writing
   FILE *fp = NULL;
@@ -64,11 +62,10 @@ void pagedir_save(const webpage_t *page, const char *pageDirectory, const int do
     fprintf(stderr, "error: could not access ID\n");
     exit(3);
   }
-  char *pathName = make_filename(pageDirectory, strID);
-  if (pathName == NULL) {
-    fprintf(stderr, "error: create filename for docID %d\n", docID);
-    exit(3);
-  }
+  char *pathName = mem_malloc_assert((strlen(pageDirectory) + 11), "error making filename");
+  strcpy(pathName, pageDirectory);
+  strcat(pathName, "/");
+  strcat(pathName, strID);
   free(strID);
 
   // open the file for writing
@@ -114,30 +111,4 @@ void pagedir_save(const webpage_t *page, const char *pageDirectory, const int do
     fprintf(stderr, "error while closing the file %d\n", docID);
     exit(3);
   }
-}
-
-/**************** make_filename ****************/
-/* Makes a path for the file by combining directoryName and name of file
- * Caller provides:
- *    non-NULL strings for directory name and file name
- * We return:
- *    name of new file
- *    NULL if parameters were NULL or ran out of memory
- * Caller is responsible for:
- *    freeing memory malloced for the file path */
-static char *make_filename(const char *directoryName, const char *file)
-{
-  if (directoryName == NULL || file == NULL) {
-    // error with arguments
-    return NULL;
-  }
-  char *fileName = malloc(strlen(directoryName) + strlen(file) + 1);
-  if (fileName == NULL) {
-    fprintf(stderr, "Error in allocating memory for filename");
-    return NULL;
-  }
-  strcpy(fileName, directoryName);
-  strcat(fileName, "/");
-  strcat(fileName, file);
-  return fileName;
 }
