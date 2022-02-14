@@ -20,7 +20,7 @@ MAKE = make
 
 ########### default ##################
 
-all: indexer indextest indexcmp
+all: indexer indextest
 
 ########### indexer ##################
 
@@ -38,13 +38,6 @@ indextest: indextest.o $(LLIBS)
 indextest.o: $C/index.h
 indextest.o: $L/hashtable.h
 
-########### indexcmp ##################
-indexcmp: indexcmp.o $(LLIBS)
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
-# indexcmp source dependencies
-indexcmp.o: $C/index.h
-indexcmp.o: $L/hashtable.h
-
 ########### test ##################
 test: indexer testing.sh
 	bash -v testing.sh
@@ -58,5 +51,5 @@ clean:
 	rm -rf *~ *.o *.dSYM
 	rm -f indexer
 	rm -f indextest
-	rm -f indexcmp
 	rm -rf testing.out
+	
