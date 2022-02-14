@@ -11,10 +11,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../libcs50/file.h"
-#include "../libcs50/mem.h"
-#include "../libcs50/counters.h"
-#include "../libcs50/hashtable.h"
+#include "file.h"
+#include "mem.h"
+#include "counters.h"
+#include "index.h"
+#include "hashtable.h"
 
 /**************** file-local global variables ****************/
 /* none */
