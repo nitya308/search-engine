@@ -42,7 +42,6 @@ typedef hashtable_t index_t;
 /* see index.h for description */
 index_t* index_new(const int index_slots)
 {
-  // ERROR CHECKING HERE ASK
   return (index_t*)hashtable_new(index_slots);
 }
 
