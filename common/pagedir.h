@@ -1,8 +1,8 @@
-/* 
+/*
  * pagedir.h - header file for CS50 'pagedir' module
- * 
- * 
- * This module is respinsible for: 
+ *
+ *
+ * This module is respinsible for:
  * Initializing and validating a pageDirectory
  * Handles writing a page to the pageDirectory
  *
@@ -43,3 +43,31 @@ bool pagedir_init(const char *pageDirectory);
  */
 void pagedir_save(const webpage_t *page, const char *pageDirectory, const int docID);
 
+/**************** pagedir_validate ****************/
+/* Validates if the given directory is a crawler produced directory
+ * by checking if .crawler file exists in it
+ *
+ * Caller provides:
+ *   a valid char pointer to a directory name
+ * We guarantee:
+ *   We return true if the directory contains a .crawler file
+ *   We return false if the directory does not exist or does not contain a .crawler file
+ */
+bool pagedir_validate(const char *dir);
+
+/**************** pagedir_load ****************/
+/* loads a webpage from file of given docID
+ *
+ * Caller provides:
+ *   a valid webpage_t pagedirectory
+ *   a unique ID
+ * We guarantee:
+ *   We create the pathname for the file pageDirectory/docID
+ *   We create a webpage with the contents by reading the file
+ *   We close the file and free memory allocated for path name of file
+ * We print an error to stderr and exit non-0 if:
+ *   If we cannot create the pathname for the file
+ *   If file cannot be opened for reading
+ *   If there is an error while retrieving content from the file for the webpage
+ */
+webpage_t *pagedir_load(const char *pageDirectory, const int docID);
