@@ -6,16 +6,17 @@
  * Nitya Agarwala, Jan 2022
  */
 
+#include "index.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "file.h"
-#include "mem.h"
 #include "counters.h"
-#include "index.h"
+#include "file.h"
 #include "hashtable.h"
+#include "mem.h"
 
 /**************** file-local global variables ****************/
 /* none */
