@@ -6,7 +6,7 @@
 L = ../libcs50
 
 # object files, and the target library
-OBJS = pagedir.o
+OBJS = pagedir.o index.o word.o
 LIB = common.a
 
 FLAGS =
@@ -24,9 +24,9 @@ $(LIB): $(OBJS)
 	ar cr $(LIB) $(OBJS)
 
 # Dependencies: object files depend on header files
-# index.o: index.h $L/file.h $L/counters.h $L/hashtable.h
+index.o: index.h $L/file.h $L/counters.h $L/hashtable.h
 pagedir.o: pagedir.h $L/webpage.h $L/file.h
-# word.o: word.h
+word.o: word.h
 
 # clean up after our compilation
 clean:
