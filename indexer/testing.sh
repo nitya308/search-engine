@@ -40,14 +40,6 @@ chmod 0444 readOnlyFile.txt
 # we run indexer on directories from the cs50-dev/shared/tse/output
 mkdir ../indexOutput
 
-# **** running indexer on letters 1 ****
-./indexer ~/cs50-dev/shared/tse/output/letters-1 ../indexOutput/letters1index
-# running indextest on the letters 1 index
-./indextest ../indexOutput/letters1index ../indexOutput/letters1indexnew
-# comparing old and new files produced by indextest
-~/cs50-dev/shared/tse/indexcmp ../indexOutput/letters1index ../indexOutput/letters1indexnew
-# comparing index produced by indexer to index given in shared dir
-~/cs50-dev/shared/tse/indexcmp ../indexOutput/letters1index ~/cs50-dev/shared/tse/output/letters-1.index
 
 # **** running indexer on letters 3 ****
 ./indexer ~/cs50-dev/shared/tse/output/letters-3 ../indexOutput/letters3index
