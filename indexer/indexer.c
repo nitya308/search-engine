@@ -18,14 +18,14 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "../common/index.h"
-#include "../common/pagedir.h"
-#include "../common/word.h"
-#include "../libcs50/counters.h"
-#include "../libcs50/file.h"
-#include "../libcs50/hashtable.h"
-#include "../libcs50/mem.h"
-#include "../libcs50/webpage.h"
+#include "index.h"
+#include "pagedir.h"
+#include "word.h"
+#include "counters.h"
+#include "file.h"
+#include "hashtable.h"
+#include "mem.h"
+#include "webpage.h"
 
 // function prototypes
 int main(const int argc, char* argv[]);
