@@ -24,14 +24,14 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "../common/pagedir.h"
-#include "../common/word.h"
-#include "../libcs50/bag.h"
-#include "../libcs50/hashtable.h"
-#include "../libcs50/mem.h"
-#include "../libcs50/webpage.h"
+#include "bag.h"
 #include "file.h"
+#include "hashtable.h"
 #include "index.h"
+#include "mem.h"
+#include "pagedir.h"
+#include "webpage.h"
+#include "word.h"
 
 // function prototypes
 int main(const int argc, char* argv[]);
@@ -39,7 +39,7 @@ static void parseArgs(const int argc, char* argv[], char** pageDirectory, char**
 static int parseQuery(char* line, char** words);
 static bool validateQuery(char** words, int wordCount);
 static counters_t* matchQuery(char** words, const int wordCount, index_t* index);
-static void mergeMatches(counters_t** andResult, counters_t** orResult);
+static void mergeMatches(counters_t** currentMatches, counters_t** orResult);
 static void matchOr(counters_t* all, counters_t* word);
 static void matchOrHelper(void* arg, int key, const int count);
 static void matchAnd(counters_t* all, counters_t* word);
@@ -51,11 +51,17 @@ static char* getURL(const char* pageDirectory, int docID);
 static int min(const int a, const int b);
 
 // struct declarations
+/**************** twoCounters ****************/
+/* holds two counter together
+ */
 struct twoCounters {
   counters_t* all;
   counters_t* word;
 };
 
+/**************** bestScore ****************/
+/* stores the topScore and docID with the topScore
+ */
 struct bestScore {
   int topScore;
   int topDoc;
@@ -109,14 +115,18 @@ int main(const int argc, char* argv[])
             printf("%s\n", "No documents match.");
           }
           // if matches are found, it enters loop and prints them
-          for (int i = 0; i < nonZero; i++) {
-            struct bestScore* currBest = (struct bestScore*)mem_malloc(sizeof(struct bestScore));
-            currBest->topDoc = 0;
-            currBest->topScore = -1;
-            counters_iterate(ctr, (void*)currBest, findBestScore);
-            printMatch(pageDirectory, currBest->topDoc, currBest->topScore);
-            counters_set(ctr, currBest->topDoc, 0);
-            mem_free(currBest);  // ask: where to free?
+          else {
+            printf("Matches %d documents (ranked):\n", nonZero);
+
+            for (int i = 0; i < nonZero; i++) {
+              struct bestScore* currBest = (struct bestScore*)mem_malloc(sizeof(struct bestScore));
+              currBest->topDoc = 0;
+              currBest->topScore = -1;
+              counters_iterate(ctr, (void*)currBest, findBestScore);
+              printMatch(pageDirectory, currBest->topDoc, currBest->topScore);
+              counters_set(ctr, currBest->topDoc, 0);
+              mem_free(currBest);  // ask: where to free?
+            }
           }
           counters_delete(ctr);
         }
@@ -237,11 +247,6 @@ static bool validateQuery(char** words, int wordCount)
     return false;
   }
 
-  if (strcmp(words[wordCount - 1], "and") == 0 || strcmp(words[wordCount - 1], "or") == 0) {
-    fprintf(stderr, "Error: '%s' cannot be last\n", words[wordCount - 1]);
-    return false;
-  }
-
   for (int i = 0; i < wordCount - 1; i++) {
     if (strcmp(words[i], "and") == 0 || strcmp(words[i], "or") == 0) {
       if (strcmp(words[i + 1], "and") == 0 || strcmp(words[i + 1], "or") == 0) {
@@ -249,6 +254,11 @@ static bool validateQuery(char** words, int wordCount)
         return false;
       }
     }
+  }
+
+  if (strcmp(words[wordCount - 1], "and") == 0 || strcmp(words[wordCount - 1], "or") == 0) {
+    fprintf(stderr, "Error: '%s' cannot be last\n", words[wordCount - 1]);
+    return false;
   }
 
   // print the clean, normalized query for user to see
@@ -277,8 +287,8 @@ static counters_t* matchQuery(char** words, const int wordCount, index_t* index)
   mem_assert(index, "inddex given to matchQuery is null");
 
   // allocating counters for results of and and or queries
-  counters_t* andResult = NULL;
-  counters_t* orResult = NULL;
+  counters_t* currentMatches = NULL;
+  counters_t* finalMatches = NULL;
 
   // variable to track if no match is found
   bool noMatch = false;
@@ -286,7 +296,7 @@ static counters_t* matchQuery(char** words, const int wordCount, index_t* index)
   // loop over all words
   for (int i = 0; i < wordCount; i++) {
     if (strcmp(words[i], "or") == 0) {
-      mergeMatches(&andResult, &orResult);
+      mergeMatches(&currentMatches, &finalMatches);
       noMatch = false;
       continue;
     }
@@ -304,45 +314,46 @@ static counters_t* matchQuery(char** words, const int wordCount, index_t* index)
     // if no matches found
     if (matches == NULL) {
       noMatch = true;
-      if (andResult != NULL) {
-        counters_delete(andResult);
-        andResult = NULL;
+      if (currentMatches != NULL) {
+        counters_delete(currentMatches);
+        currentMatches = NULL;
       }
     }
     // if matches found
     else {
-      if (andResult == NULL) {
-        andResult = mem_assert(counters_new(), "andResult was null");
-        matchOr(andResult, matches);
+      if (currentMatches == NULL) {
+        currentMatches = mem_assert(counters_new(), "currentMatches was null");
+        matchOr(currentMatches, matches);
       }
       else {
-        matchAnd(andResult, matches);
+        matchAnd(currentMatches, matches);
       }
     }
   }
-  mergeMatches(&andResult, &orResult);
-  return orResult;
+  mergeMatches(&currentMatches, &finalMatches);
+  return finalMatches;
 }
 
 /**************** mergeMatches ****************/
-/* combine results of and and or seacrhes for each query
+/* combine current matches into final matches.
+It is called when an "or" word is found
  *
  * Caller provides
- *   counter result of and search (andResult)
- *   counter result of or search  (orResult)
+ *   counter with current matches
+ *   counter with final matches
  *
  * We guarantee:
- *   We combine both results into orResult and delete the andResult
+ *   We combine both results into final matches and delete the current matches
  */
-static void mergeMatches(counters_t** andResult, counters_t** orResult)
+static void mergeMatches(counters_t** currentMatches, counters_t** finalMatches)
 {
-  if (*andResult != NULL) {
-    if (*orResult == NULL) {
-      *orResult = mem_assert(counters_new(), "");
+  if (*currentMatches != NULL) {
+    if (*finalMatches == NULL) {
+      *finalMatches = mem_assert(counters_new(), "");
     }
-    matchOr(*orResult, *andResult);  // combines counters
-    counters_delete(*andResult);
-    *andResult = NULL;
+    matchOr(*finalMatches, *currentMatches);  // combines counters
+    counters_delete(*currentMatches);
+    *currentMatches = NULL;
   }
 }
 
