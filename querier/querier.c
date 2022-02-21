@@ -49,6 +49,7 @@ static void findBestScore(void* arg, const int key, const int count);
 static void printMatch(void* arg, const int key, const int count);
 static char* getURL(const char* pageDirectory, int docID);
 static int min(const int a, const int b);
+int fileno(FILE* stream);
 
 // struct declarations
 /**************** twoCounters ****************/
@@ -91,7 +92,9 @@ int main(const int argc, char* argv[])
   index_t* index = mem_assert(index_load(fp), "loading index failed");
 
   // read search queries from stdin, one per line, until EOF.
-  printf("%s", "Query? ");
+  if (isatty(fileno(stdin))) {
+    printf("Query? ");
+  }
   char line[150];  // to store line from stdin
   while (fgets(line, 150, stdin) != NULL) {
     if (line != NULL) {
@@ -117,7 +120,6 @@ int main(const int argc, char* argv[])
           // if matches are found, it enters loop and prints them
           else {
             printf("Matches %d documents (ranked):\n", nonZero);
-
             for (int i = 0; i < nonZero; i++) {
               struct bestScore* currBest = (struct bestScore*)mem_malloc(sizeof(struct bestScore));
               currBest->topDoc = 0;
@@ -128,11 +130,14 @@ int main(const int argc, char* argv[])
               mem_free(currBest);  // ask: where to free?
             }
           }
+          printf("---------------------------------------------\n");
           counters_delete(ctr);
         }
       }
     }
-    printf("%s", "Query? ");
+    if (isatty(fileno(stdin))) {
+      printf("Query? ");
+    }
   }
   index_delete(index);
   exit(0);
