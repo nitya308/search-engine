@@ -127,7 +127,7 @@ int main(const int argc, char* argv[])
               counters_iterate(ctr, (void*)currBest, findBestScore);
               printMatch(pageDirectory, currBest->topDoc, currBest->topScore);
               counters_set(ctr, currBest->topDoc, 0);
-              mem_free(currBest);  // ask: where to free?
+              mem_free(currBest);
             }
           }
           printf("---------------------------------------------\n");
