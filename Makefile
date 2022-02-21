@@ -13,7 +13,7 @@ all:
 	make -C common
 	make -C crawler
 	make -C indexer
-  make -C querier
+	make -C querier
 
 ############### TAGS for emacs users ##########
 TAGS:  Makefile */Makefile */*.c */*.h */*.md */*.sh
