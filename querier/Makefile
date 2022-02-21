@@ -41,10 +41,6 @@ fuzzquery.o: $L/mem.h $L/file.h
 test: querier testing.sh
 	bash -v testing.sh
 
-########### valgrind ##################
-valgrind: querier valgrind.sh
-	bash -v valgrind.sh
-
 clean:
 	rm -f core
 	rm -rf *~ *.o *.dSYM
