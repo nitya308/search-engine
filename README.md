@@ -54,4 +54,4 @@ Files contained in this repository so far:
 |   |-- scrapetest.txt
 |   |-- wikitest.txt
 ```
-
+To compile simply 'make' at the top-level
