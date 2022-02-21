@@ -1,0 +1,383 @@
+bash -v testing.sh
+# testing.sh - performs indexer testing
+#
+# usage: testing.sh
+#
+# input: none
+# output: writes file with results from tests
+
+# Checking with wrong arguments
+# zero arguments                  
+./querier
+error: wrong number of arguments
+usage: ./querier seedURL pageDirectory maxDepth
+
+# one argument                                         
+./querier ~/cs50-dev/shared/tse/output
+error: wrong number of arguments
+usage: ./querier seedURL pageDirectory maxDepth
+
+# three arguments
+./querier ~/cs50-dev/shared/tse/output ../indexOutput extraArgument
+error: wrong number of arguments
+usage: ./querier seedURL pageDirectory maxDepth
+
+# invalid pageDirectory (non-existent path) 
+./querier ../doesNotExist ../indexOutput/1
+error: page directory is invalid or not a crawler produced directory
+
+# invalid pageDirectory (not a crawler directory)
+mkdir ../notcrawler
+mkdir: cannot create directory '../notcrawler': File exists
+./querier ../notcrawler ../indexOutput/1
+error: page directory is invalid or not a crawler produced directory
+
+# invalid indexFile (non-existent path) 
+./querier ~/cs50-dev/shared/tse/output/letters-3 ../doesNotExist/file
+error: index file not readable
+
+# testing bad queries
+./querier ~/cs50-dev/shared/tse/output/letters-3 ~/cs50-dev/shared/tse/output/letters-3.index < badqueries.txt
+Error: 'and' cannot be first
+Error: 'or' cannot be first
+Error: 'and' cannot be first
+Error: 'or' cannot be first
+Error: 'or' cannot be last
+Error: 'and' cannot be last
+Error: 'and' and 'or' cannot be adjacent
+Error: 'and' and 'and' cannot be adjacent
+Error: 'or' and 'and' cannot be adjacent
+Error: bad character '!' in query
+Error: bad character '(' in query
+
+
+# **** Regression Testing ****
+# Testing letters depth 2
+./querier ~/cs50-dev/shared/tse/output/letters-2/ ~/cs50-dev/shared/tse/output/letters-2.index < letterstest.txt
+error: file does not exist or cannot be readerror: file does not exist or cannot be readerror: file does not exist or cannot be readerror: file does not exist or cannot be readerror: file does not exist or cannot be readerror: file does not exist or cannot be readerror: file does not exist or cannot be readerror: file does not exist or cannot be readQuery: playground and algorithm
+No documents match.
+---------------------------------------------
+Query: for and computational
+Matches 1 documents (ranked):
+score 1  doc 7: NULL
+---------------------------------------------
+Query: this or depth or breadth
+Matches 4 documents (ranked):
+score 1  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 1  doc 6: NULL
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+---------------------------------------------
+Query: this or depth and breadth
+Matches 2 documents (ranked):
+score 1  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+---------------------------------------------
+Query: this and depth or breadth
+Matches 1 documents (ranked):
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+---------------------------------------------
+Query: home and for
+Matches 7 documents (ranked):
+score 1  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/
+score 1  doc 2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+score 1  doc 5: NULL
+score 1  doc 6: NULL
+score 1  doc 7: NULL
+---------------------------------------------
+Query: home or for
+Matches 7 documents (ranked):
+score 3  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/
+score 3  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 2  doc 2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+score 2  doc 4: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+score 2  doc 5: NULL
+score 2  doc 6: NULL
+score 2  doc 7: NULL
+---------------------------------------------
+
+# Testing letters depth 3 with valgrind
+valgrind --leak-check=full --show-leak-kinds=all ./querier ~/cs50-dev/shared/tse/output/letters-3/ ~/cs50-dev/shared/tse/output/letters-3.index < letterstest.txt
+==37596== Memcheck, a memory error detector
+==37596== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==37596== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==37596== Command: ./querier /thayerfs/home/f00567h/cs50-dev/shared/tse/output/letters-3/ /thayerfs/home/f00567h/cs50-dev/shared/tse/output/letters-3.index
+==37596== 
+Query: playground and algorithm
+No documents match.
+---------------------------------------------
+Query: for and computational
+Matches 1 documents (ranked):
+score 1  doc 7: http://cs50tse.cs.dartmouth.edu/tse/letters/C.html
+---------------------------------------------
+Query: this or depth or breadth
+Matches 4 documents (ranked):
+score 1  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 1  doc 6: http://cs50tse.cs.dartmouth.edu/tse/letters/D.html
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+---------------------------------------------
+Query: this or depth and breadth
+Matches 2 documents (ranked):
+score 1  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+---------------------------------------------
+Query: this and depth or breadth
+Matches 1 documents (ranked):
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+---------------------------------------------
+Query: home and for
+Matches 7 documents (ranked):
+score 1  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/
+score 1  doc 2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+score 1  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 1  doc 4: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+score 1  doc 5: http://cs50tse.cs.dartmouth.edu/tse/letters/E.html
+score 1  doc 6: http://cs50tse.cs.dartmouth.edu/tse/letters/D.html
+score 1  doc 7: http://cs50tse.cs.dartmouth.edu/tse/letters/C.html
+---------------------------------------------
+Query: home or for
+Matches 7 documents (ranked):
+score 3  doc 1: http://cs50tse.cs.dartmouth.edu/tse/letters/
+score 3  doc 3: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score 2  doc 2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+score 2  doc 4: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+score 2  doc 5: http://cs50tse.cs.dartmouth.edu/tse/letters/E.html
+score 2  doc 6: http://cs50tse.cs.dartmouth.edu/tse/letters/D.html
+score 2  doc 7: http://cs50tse.cs.dartmouth.edu/tse/letters/C.html
+---------------------------------------------
+==37596== 
+==37596== HEAP SUMMARY:
+==37596==     in use at exit: 0 bytes in 0 blocks
+==37596==   total heap usage: 336 allocs, 336 frees, 226,319 bytes allocated
+==37596== 
+==37596== All heap blocks were freed -- no leaks are possible
+==37596== 
+==37596== For counts of detected and suppressed errors, rerun with: -v
+==37596== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+# Testing toscrape depth 2
+./querier ~/cs50-dev/shared/tse/output/toscrape-2/ ~/cs50-dev/shared/tse/output/toscrape-2.index < scrapetest.txt
+Query: fame
+Matches 11 documents (ranked):
+score 3  doc 18: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/americas-cradle-of-quarterbacks-western-pennsylvanias-football-factory-from-johnny-unitas-to-joe-montana_974/index.html
+score 2  doc 328: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sugar-rush-offensive-line-2_108/index.html
+score 2  doc 457: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/keep-me-posted_594/index.html
+score 2  doc 464: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-perfect-play-play-by-play-1_352/index.html
+score 1  doc 11: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-bear-and-the-piano_967/index.html
+score 1  doc 37: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-coming-woman-a-novel-based-on-the-life-of-the-infamous-feminist-victoria-woodhull_993/index.html
+score 1  doc 277: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-hook-up-game-on-1_68/index.html
+score 1  doc 326: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/icing-aces-hockey-2_25/index.html
+score 1  doc 330: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-book-of-basketball-the-nba-according-to-the-sports-guy_232/index.html
+score 1  doc 341: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/arena_587/index.html
+score 1  doc 466: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sit-stay-love_486/index.html
+---------------------------------------------
+Query: fame and miss
+No documents match.
+---------------------------------------------
+Query: fame and friends
+Matches 1 documents (ranked):
+score 1  doc 11: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-bear-and-the-piano_967/index.html
+---------------------------------------------
+Query: slimmer
+Matches 1 documents (ranked):
+score 1  doc 56: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/10-day-green-smoothie-cleanse-lose-up-to-15-pounds-in-10-days_581/index.html
+---------------------------------------------
+Query: slimmer or crossing
+Matches 3 documents (ranked):
+score 2  doc 438: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-murder-that-never-was-forensic-instincts-5_939/index.html
+score 1  doc 56: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/10-day-green-smoothie-cleanse-lose-up-to-15-pounds-in-10-days_581/index.html
+score 1  doc 34: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/starving-hearts-triangular-trade-trilogy-1_990/index.html
+---------------------------------------------
+Query: slimmer or crossing or bends
+Matches 4 documents (ranked):
+score 2  doc 438: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-murder-that-never-was-forensic-instincts-5_939/index.html
+score 1  doc 56: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/10-day-green-smoothie-cleanse-lose-up-to-15-pounds-in-10-days_581/index.html
+score 1  doc 34: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/starving-hearts-triangular-trade-trilogy-1_990/index.html
+score 1  doc 226: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/booked_365/index.html
+---------------------------------------------
+
+# Testing toscrape depth 1 with valgrind
+valgrind --leak-check=full --show-leak-kinds=all ./querier ~/cs50-dev/shared/tse/output/toscrape-1/ ~/cs50-dev/shared/tse/output/toscrape-1.index < scrapetest.txt
+==37624== Memcheck, a memory error detector
+==37624== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==37624== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==37624== Command: ./querier /thayerfs/home/f00567h/cs50-dev/shared/tse/output/toscrape-1/ /thayerfs/home/f00567h/cs50-dev/shared/tse/output/toscrape-1.index
+==37624== 
+Query: fame
+Matches 1 documents (ranked):
+score 1  doc 15: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-coming-woman-a-novel-based-on-the-life-of-the-infamous-feminist-victoria-woodhull_993/index.html
+---------------------------------------------
+Query: fame and miss
+No documents match.
+---------------------------------------------
+Query: fame and friends
+No documents match.
+---------------------------------------------
+Query: slimmer
+No documents match.
+---------------------------------------------
+Query: slimmer or crossing
+Matches 1 documents (ranked):
+score 1  doc 12: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/starving-hearts-triangular-trade-trilogy-1_990/index.html
+---------------------------------------------
+Query: slimmer or crossing or bends
+Matches 1 documents (ranked):
+score 1  doc 12: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/starving-hearts-triangular-trade-trilogy-1_990/index.html
+---------------------------------------------
+==37624== 
+==37624== HEAP SUMMARY:
+==37624==     in use at exit: 0 bytes in 0 blocks
+==37624==   total heap usage: 20,331 allocs, 20,331 frees, 522,466 bytes allocated
+==37624== 
+==37624== All heap blocks were freed -- no leaks are possible
+==37624== 
+==37624== For counts of detected and suppressed errors, rerun with: -v
+==37624== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+# Testing wikipedia depth 2
+./querier ~/cs50-dev/shared/tse/output/wikipedia-2/ ~/cs50-dev/shared/tse/output/wikipedia-2.index < wikitest.txt
+Query: arabian
+Matches 4 documents (ranked):
+score 5  doc 1624: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Entertainment.html
+score 2  doc 469: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Synecdoche.html
+score 2  doc 1213: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unicode.html
+score 1  doc 389: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/IBM.html
+---------------------------------------------
+Query: friends and today and showed
+Matches 16 documents (ranked):
+score 2  doc 221: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Saint_Anselm_College.html
+score 2  doc 308: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Fox_News.html
+score 2  doc 379: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/NBC.html
+score 1  doc 255: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Swarthmore_College.html
+score 1  doc 355: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/24_(TV_series).html
+score 1  doc 412: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Joseph_Smith.html
+score 1  doc 473: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Instant_messaging.html
+score 1  doc 485: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Fraternities_and_sororities_in_North_America.html
+score 1  doc 524: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dwight_D.html
+score 1  doc 564: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/College_admissions_in_the_United_States.html
+score 1  doc 571: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Supreme_Court_of_the_United_States.html
+score 1  doc 1014: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Apple%2c_Inc.html
+score 1  doc 1115: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Englewood_Cliffs%2c_NJ.html
+score 1  doc 1527: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Video_games.html
+score 1  doc 1591: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Kurt_G%c3%b6del.html
+score 1  doc 1619: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Video_game.html
+---------------------------------------------
+Query: include and pie
+Matches 17 documents (ranked):
+score 2  doc 608: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/United_States.html
+score 2  doc 613: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Latin.html
+score 2  doc 614: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Latin_language.html
+score 2  doc 1667: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Human.html
+score 1  doc 485: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Fraternities_and_sororities_in_North_America.html
+score 1  doc 832: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Anglo-Saxon_language.html
+score 1  doc 884: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Ubuntu_(operating_system).html
+score 1  doc 888: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Red_Hat_Enterprise_Linux.html
+score 1  doc 901: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Debian.html
+score 1  doc 1149: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Type_I_and_type_II_errors.html
+score 1  doc 1294: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Supercomputer.html
+score 1  doc 1456: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Genetic_engineering.html
+score 1  doc 1466: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Wearable_computer.html
+score 1  doc 1468: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Visualization_(computer_graphics).html
+score 1  doc 1602: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Slavic_languages.html
+score 1  doc 1620: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Animation.html
+score 1  doc 1629: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Statistics.html
+---------------------------------------------
+Query: showed and pie and discontinued or buries
+Matches 1 documents (ranked):
+score 1  doc 412: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Joseph_Smith.html
+---------------------------------------------
+
+# Testing wikipedia depth 3 with valgrind
+valgrind --leak-check=full --show-leak-kinds=all ./querier ~/cs50-dev/shared/tse/output/wikipedia-3/ ~/cs50-dev/shared/tse/output/wikipedia-3.index < wikitest.txt
+==37726== Memcheck, a memory error detector
+==37726== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==37726== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==37726== Command: ./querier /thayerfs/home/f00567h/cs50-dev/shared/tse/output/wikipedia-3/ /thayerfs/home/f00567h/cs50-dev/shared/tse/output/wikipedia-3.index
+==37726== 
+Query: arabian
+Matches 4 documents (ranked):
+score 5  doc 894: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Entertainment.html
+score 2  doc 19: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unicode.html
+score 2  doc 985: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Synecdoche.html
+score 1  doc 375: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/IBM.html
+---------------------------------------------
+Query: friends and today and showed
+Matches 16 documents (ranked):
+score 2  doc 728: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Saint_Anselm_College.html
+score 2  doc 823: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Fox_News.html
+score 2  doc 896: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/NBC.html
+score 1  doc 142: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Kurt_G%c3%b6del.html
+score 1  doc 424: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Englewood_Cliffs%2c_NJ.html
+score 1  doc 486: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Instant_messaging.html
+score 1  doc 767: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Swarthmore_College.html
+score 1  doc 869: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/24_(TV_series).html
+score 1  doc 897: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Video_game.html
+score 1  doc 928: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Joseph_Smith.html
+score 1  doc 1009: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Fraternities_and_sororities_in_North_America.html
+score 1  doc 1049: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dwight_D.html
+score 1  doc 1087: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/College_admissions_in_the_United_States.html
+score 1  doc 1094: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Supreme_Court_of_the_United_States.html
+score 1  doc 1414: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Video_games.html
+score 1  doc 1477: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Apple%2c_Inc.html
+---------------------------------------------
+Query: include and pie
+Matches 17 documents (ranked):
+score 2  doc 157: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/United_States.html
+score 2  doc 1133: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Latin.html
+score 2  doc 1135: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Latin_language.html
+score 2  doc 1675: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Human.html
+score 1  doc 241: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Supercomputer.html
+score 1  doc 484: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Genetic_engineering.html
+score 1  doc 487: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Statistics.html
+score 1  doc 598: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Wearable_computer.html
+score 1  doc 604: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Visualization_(computer_graphics).html
+score 1  doc 768: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Debian.html
+score 1  doc 883: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Animation.html
+score 1  doc 1009: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Fraternities_and_sororities_in_North_America.html
+score 1  doc 1304: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Anglo-Saxon_language.html
+score 1  doc 1354: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Ubuntu_(operating_system).html
+score 1  doc 1366: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Red_Hat_Enterprise_Linux.html
+score 1  doc 1530: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Type_I_and_type_II_errors.html
+score 1  doc 1646: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Slavic_languages.html
+---------------------------------------------
+Query: showed and pie and discontinued or buries
+Matches 1 documents (ranked):
+score 1  doc 928: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Joseph_Smith.html
+---------------------------------------------
+==37726== 
+==37726== HEAP SUMMARY:
+==37726==     in use at exit: 0 bytes in 0 blocks
+==37726==   total heap usage: 2,504,544 allocs, 2,504,544 frees, 46,284,978 bytes allocated
+==37726== 
+==37726== All heap blocks were freed -- no leaks are possible
+==37726== 
+==37726== For counts of detected and suppressed errors, rerun with: -v
+==37726== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+# **** Fuzz Testing ****
+# Generating 1000 random queries
+./fuzzquery ~/cs50-dev/shared/tse/output/toscrape-2.index 1000 0 | ./querier ~/cs50-dev/shared/tse/output/toscrape-2 ~/cs50-dev/shared/tse/output/toscrape-2.index > /dev/null && echo success || echo failed
+./fuzzquery: generating 1000 queries from 12137 words
+success
+
+# Running valgrind on fuzzquery
+valgrind --leak-check=full --show-leak-kinds=all ./fuzzquery ~/cs50-dev/shared/tse/output/toscrape-2.index 1000 0 | ./querier ~/cs50-dev/shared/tse/output/toscrape-2 ~/cs50-dev/shared/tse/output/toscrape-2.index > /dev/null && echo success || echo failed
+==2099== Memcheck, a memory error detector
+==2099== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==2099== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==2099== Command: ./fuzzquery /thayerfs/home/f00567h/cs50-dev/shared/tse/output/toscrape-2.index 1000 0
+==2099== 
+./fuzzquery: generating 1000 queries from 12137 words
+==2099== 
+==2099== HEAP SUMMARY:
+==2099==     in use at exit: 0 bytes in 0 blocks
+==2099==   total heap usage: 364,358 allocs, 364,358 frees, 236,226,944 bytes allocated
+==2099== 
+==2099== All heap blocks were freed -- no leaks are possible
+==2099== 
+==2099== For counts of detected and suppressed errors, rerun with: -v
+==2099== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+success
