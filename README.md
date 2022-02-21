@@ -29,5 +29,29 @@ Files contained in this repository so far:
 |   |-- testing.out
 |   |-- testing.sh
 |   `-- valgrind.sh
+|-- indexer
+|   |-- .gitignore
+|   |-- IMPLEMENTATION.md
+|   |-- Makefile
+|   |-- README.md
+|   |-- indexer.c
+|   |-- indextest.c
+|   |-- testing.out
+|   |-- testing.sh
+|   `-- valgrind.sh
+|-- querier
+|   |-- .gitignore
+|   |-- IMPLEMENTATION.md
+|   |-- DESIGN.md
+|   |-- Makefile
+|   |-- README.md
+|   |-- querier.c
+|   |-- fuzzquery.c
+|   |-- testing.out
+|   |-- testing.sh
+|   |-- badqueries.txt
+|   |-- letterstest.txt
+|   |-- scrapetest.txt
+|   |-- wikitest.txt
 ```
 
