@@ -30,4 +30,4 @@ Files contained in this repository so far:
 |   |-- testing.sh
 |   `-- valgrind.sh
 ```
-
+To compile simply 'make' at the top-level
