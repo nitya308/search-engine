@@ -13,6 +13,15 @@ where:
 - pageDirectory is the pathname of a directory produced by the Crawler, and
 - indexFilename is the pathname of a file produced by the Indexer.
 
+### Functionality
+
+The querier meets the full specs outlined in REQUIREMENTS.md.
+It:
+* Prints the set of documents that contain all the words in the query
+* It also supports 'and' and 'or' operators.
+* It also supports 'and' precedence over 'or'.
+* And it prints the document set in decreasing order by score, thus meeting the full specs.
+
 ### Implementation
 
 The querier has 7 main functions with associated helpers:
