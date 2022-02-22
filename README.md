@@ -1,6 +1,10 @@
 # CS50 TSE
 ## Nitya Agarwala (nitya308)
 
+****************
+* EXTENSION USED for querier
+****************
+
 This is the **Tiny Search Engine** project for CS 50: Software Design and Implementation
 
 It contains (will contain) 3 main parts: _crawler_, _indexer_ and _querier_. For assumptions and implementation of each, see individual directories.
