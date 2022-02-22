@@ -104,6 +104,7 @@ Creates a counter with all matches for the query searched by user
 Given a array of words in the query, the number of words and an index, return a counter with the docIDs and score of the documents in the index for the query
 
 Psuedocode:
+
 	initialize a counter for currentMatches to NULL
 	initialize a counter for finalMatches to NULL
 	initalize bool variable to track noMatch to false
@@ -130,40 +131,51 @@ Psuedocode:
 
 ### matchAnd
 Two find matches for two sequences when "and" is between them. Given a counter with all matching documents, and a counter for matching documents for the current word, it returns a counter with the mininum score of each document.
+
 Psuedocode:
+
 	put both counters in a structure called twoCounters
 	calls counters_iterate on the counter with all matches and passes matchAndHelper
 
 ### matchAndHelper
 The helper function for matchAnd above. Given an argument with two counters, a key and a count, it sets the count of each docID in the first counter to the minumum of counts from the two counters.
+
 Psuedocode:
+
 	extracts two counters from argument
 	find the minimum count for the given docID key from the two counters
 	sets the count of the docID in the first counter to the minimum
 
 ### matchOr
 Two find matches for two sequences when "or" is between them. Given a counter with all matching documents, and a counter for matching documents for the current word, it returns a counter with the score = sum of hits in each document.
+
 Psuedocode:
+
 	verifies that arguments are not null
-	calls counters_iterate on the counter with current word matches
-  and passes matchOrHelper
+	calls counters_iterate on the counter with current word matches and passes matchOrHelper
 
 ### matchOrHelper
 The helper function for matchOr above. Given an argument with a counters, a key and a count, it sets the count of each docID in the first counter to the sum of hits in each document.
+
 Psuedocode:
+
 	extracts the counter with all matches from argument
 	adds the count from counter for current word and count from all 
 	sets the count of all to this sum
 
 ### findNumMatches
 Given an integer pointer as an argument, a docID as key and a count, calculates number of documents with matches for a query (how many scores are > 0).
+
 Psuedocode:
+
 	extracts int pointer from argument
 	if the count is greater than 0, increment the int pointer
 
 ### findBestScore
 Given a bestScore struct that holds the docID and score for the best score, updates it if the given docID has a better score.
+
 Psuedocode:
+
 	if the count> current best score
 		set bestScore id to docID
 		set bestScore score to new best score
@@ -173,7 +185,9 @@ Prints a match for the query in the appropriate format as specified in the requi
 
 ### getURL
 Given a pageDirectory and docID, extracts the URL from that file.
+
 Psuedocode:
+
 	construct a pathname = pageDirectory/docID
 	open a file pointer for reading
 	if file cannot be read

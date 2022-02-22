@@ -1,9 +1,11 @@
 # CS50 TSE
 ## Nitya Agarwala (nitya308)
 
+```
 ****************
-* EXTENSION USED for querier
+* EXTENSION USED
 ****************
+```
 
 This is the **Tiny Search Engine** project for CS 50: Software Design and Implementation
 
