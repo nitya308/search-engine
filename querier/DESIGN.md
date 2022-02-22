@@ -86,7 +86,7 @@ where *matchQuery:*
 				call AND matching helper function to find intersection of current and new matches
 				store the result in current matches
 	combine union of all current matches with final matches
-  store union in final matches
+	store union in final matches
 	return final matches
 
 
