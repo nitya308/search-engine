@@ -6,7 +6,7 @@
 
 Recall the [Assignment](https://github.com/cs50spring2021/tse-labs/tree/main/querier).
 
-**Total: 99/100 points**
+**Total: 100/100 points**
 
 ## (10) Overall
 
@@ -32,9 +32,9 @@ Recall the [Assignment](https://github.com/cs50spring2021/tse-labs/tree/main/que
 
 ## (30) Functionality
 
-29/30 points
+30/30 points
 
-* -1: Don't need to redirect error message for invalid queries to stderr, just print to stdout, because it's just bad user input. 
+* Don't need to redirect error message for invalid queries to stderr, just print to stdout, because it's just bad user input. 
 
 ## (10) Memory leaks, according to valgrind
 
